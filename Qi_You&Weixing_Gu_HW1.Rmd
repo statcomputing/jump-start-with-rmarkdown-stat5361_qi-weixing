@@ -1,0 +1,106 @@
+---
+title: "5361 stat Homework1"
+author: "Qi&Weixing"
+date: "January 26, 2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+t <- c(0.0, 0.67, 0.84, 1.28, 1.65, 2.32, 2.58, 3.09, 3.72)
+n <- c(10^2, 10^3, 10^4)
+
+###Function with the true value of cdf
+phi_true <- function(t){
+  x <- array()
+  for (i in 1:length(t)){
+    x[i] <- pnorm(t[i])
+  } 
+  return(x)
+}
+
+###Function with the approximation at a = 10^2, 10^3, 10^4
+phi_est <- function(n, t) {
+  m <- array(0, dim = c(9,3))
+  for (k in 1:length(n)) {
+    A <- rnorm(n[k])
+    for (i in 1:length(t)) {
+      for (j in 1:length(A)) {
+        if (A[j] <= t[i]) I <- 1
+        else I <- 0
+      m[i,k] <- (m[i,k]+I)
+      }
+    m[i,k] <- m[i,k]/length(A)
+    }
+  }
+  return(m)
+}
+
+###Function with the combination the True value and Estimated value
+comparison_val <- function(n, t){
+  cbind(phi_est(n,t), phi_true(t))
+}
+
+###Function with the experiments of 100 times
+experiment_100 <- function(t,n){
+  x <- array(0, dim = c(9,4,100))
+  for (i in 1:100){
+    a <- comparison_val(n, t)
+    for (j in 1:length(t)){
+      for (k in 1:(length(n)+1)){
+        x[j,k,i] <- a[j,k]
+      }
+    }
+  }
+  return(x)
+}
+
+###Box Plot of the bias at all t
+#boxplot(experiment_100(t,n)[ , 1, ]~t)
+#boxplot(experiment_100(t,n)[ , 2, ]~t)
+#boxplot(experiment_100(t,n)[ , 3, ]~t)
+
+```
+
+## Abstract
+
+First, we use built-in function pnorm to calculate the true value of CDF equation (1). Then we use the (2) equation to calculate the estimated value. In the process of using (2), we generate different amounts of numbers and calculate value in different time. Finally we uotput our table and boxplots.
+
+## Math equations
+\begin{equation}
+\Phi(t) = \int_{-\infty}^t \frac{1}{\sqrt{2\pi}} e^{-y^2 / 2} dy,
+\tag{1}
+\end{equation}
+
+\begin{equation}
+\hat\Phi(t) = \frac{1}{n} \sum_{i=1}^n I(X_i \le t),
+\tag{2}
+\end{equation}
+```{r true_value}
+phi_true
+```
+```{r experiment_value}
+phi_est
+```
+```{r experiment_100}
+experiment_100
+```
+```{r compare}
+comparison_val
+```
+## Included Plots and Tables
+We also generate plots and tables;
+
+```{r pressure, echo=FALSE}
+###Box Plot of the bias at all t
+boxplot(experiment_100(t,n)[ , 1, ]~t)
+boxplot(experiment_100(t,n)[ , 2, ]~t)
+boxplot(experiment_100(t,n)[ , 3, ]~t)
+print(experiment_100(t,n)[ , ,1])
+```
+We omit the rest of tables.
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
